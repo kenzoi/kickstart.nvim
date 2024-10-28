@@ -42,6 +42,7 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'js-debug-adapter',
       },
     }
 
@@ -83,6 +84,34 @@ return {
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+    -- Install javascript/typescript specific config
+    -- See https://www.darricheng.com/posts/setting-up-nodejs-debugging-in-neovim/
+    -- https://theosteiner.de/debugging-javascript-frameworks-in-neovim
+    -- Typescript: https://www.reddit.com/r/neovim/comments/y7dvva/typescript_debugging_in_neovim_with_nvimdap/
+    dap.adapters['pwa-node'] = {
+      type = 'server',
+      host = '::1',
+      port = '${port}',
+      executable = {
+        command = 'js-debug-adapter',
+        args = {
+          '${port}',
+        },
+      },
+    }
+
+    for _, language in ipairs { 'typescript', 'javascript' } do
+      dap.configurations[language] = {
+        {
+          type = 'pwa-node',
+          request = 'launch',
+          name = 'Launch file',
+          program = '${file}',
+          cwd = '${workspaceFolder}',
+        },
+      }
+    end
 
     -- Install golang specific config
     require('dap-go').setup {

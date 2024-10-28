@@ -6,7 +6,9 @@ return {
     config = function()
       local lint = require 'lint'
       lint.linters_by_ft = {
-        markdown = { 'markdownlint' },
+        markdown = { 'markdownlint' }, -- (require) npm install -g markdownlint-cli
+        javascript = { 'eslint' }, -- (require) npm install --save-dev eslint
+        typescript = { 'eslint' },
       }
 
       -- To allow other plugins to add linters to require('lint').linters_by_ft,
@@ -47,7 +49,7 @@ return {
       vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
         group = lint_augroup,
         callback = function()
-          require('lint').try_lint()
+          require('lint').try_lint(nil, { ignore_errors = true }) -- ignore_errors option to ignore command-not-found errors
         end,
       })
     end,
